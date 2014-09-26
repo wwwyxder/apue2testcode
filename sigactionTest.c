@@ -8,6 +8,7 @@ void sig_int(int signo)
 }
 void sig_int3(int signo, siginfo_t* info, void* context)
 {
+    ucontext_t* pc = context;
     printf("SIGINT caught in 3.\n");
     return;
 }
