@@ -59,8 +59,8 @@ int main()
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     u_int32_t tmp_addr;
-    inet_pton(AF_INET, "127.0.0.1", &tmp_addr);
-    addr.sin_addr.s_addr = tmp_addr;//htonl(tmp_addr);
+    inet_pton(AF_INET, "192.168.1.140", &tmp_addr);
+    addr.sin_addr.s_addr = INADDR_ANY;//tmp_addr;
     addr.sin_port = htons(12200);
     memset(&addr.sin_zero, 0, sizeof(addr.sin_zero));
     int fd = initserver(SOCK_STREAM, (struct sockaddr*)&addr, sizeof(struct sockaddr_in),128);
