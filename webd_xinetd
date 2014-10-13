@@ -1,0 +1,16 @@
+# default: off
+# description: Shell web server
+service webd
+{
+	disable		= no
+	type		= UNLISTED
+	id		= webd
+	socket_type	= stream
+	protocol	= tcp
+	port		= 8282
+	user		= nobody
+	wait		= no
+	server		= /usr/local/bin/webd
+	server_args	= /var/shweb/www
+}                                                                               
+
