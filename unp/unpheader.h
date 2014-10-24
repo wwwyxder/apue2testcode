@@ -11,6 +11,20 @@ void Perror(const char *s)
     perror(s);
     exit(1);
 }
+char* Fgets(char* ptr, int n, FILE *stream)
+{
+    char *rptr = fgets(ptr,n,stream);
+    if(rptr==NULL && ferror(stream)) 
+        Perror("fgets error");
+    return rptr;
+}
+int Fputs(char *ptr, FILE *stream)
+{
+    int r = fputs(ptr,stream);
+    if(r==EOF)
+        Perror("fputs error");
+    return r;
+}
 int Socket(int domain, int type, int protocol)
 {
     int fd = socket(domain, type, protocol);
@@ -40,6 +54,12 @@ int Accept(int sockfd, struct sockaddr *addr, socklen_t *socklen)
         Perror("accept error");
     }
     return confd;
+}
+int Connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
+{
+    if(connect(sockfd, addr, addrlen)==-1)
+        Perror("connect error");
+    return 0;
 }
 ssize_t writen(int fd, const void *buf, size_t count)
 {
@@ -145,7 +165,7 @@ ssize_t getlinebuf(char **vptrptr)
  *in success, return the number of chars reads, including '\n', in other word, strlen(buf).
  *if error, return -1
  */
-ssize_t readline(int fd, void *buf, size_t maxlen) 
+ssize_t readline(int fd, void *buf, size_t maxlen)
 {
     char *p = buf;
     size_t i;
@@ -172,5 +192,13 @@ ssize_t Readline(int fd, void *buf, size_t maxlen)
     if(-1 == n)
         Perror("readline error");
     return n;
+}
+pid_t Fork()
+{
+    pid_t pid;
+    if( (pid=fork()) < 0) {
+        Perror("fork error");
+    }
+    return pid;
 }
 #endif
