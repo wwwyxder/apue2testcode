@@ -6,6 +6,8 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <signal.h>
+#include <poll.h>
 void Perror(const char *s)
 {
     perror(s);
@@ -49,9 +51,10 @@ int Listen(int sockfd, int backlog)
 }
 int Accept(int sockfd, struct sockaddr *addr, socklen_t *socklen)
 {
-    int confd = accept(sockfd, addr, socklen);
-    if(confd == -1) {
-        Perror("accept error");
+    int confd;
+    while((confd = accept(sockfd, addr, socklen)) == -1) {
+        if(errno==EINTR || errno==ECONNABORTED)
+            Perror("accept error");
     }
     return confd;
 }
@@ -111,6 +114,13 @@ ssize_t Readn(int fd, void *buf, size_t count)
     ssize_t n = readn(fd, buf, count);
     if(-1 == n) 
         Perror("readn error");
+    return n;
+}
+ssize_t Read(int fd, void *buf, size_t count)
+{
+    ssize_t n = read(fd,buf,count);
+    if(n==-1)
+        Perror("read error");
     return n;
 }
 
@@ -200,5 +210,62 @@ pid_t Fork()
         Perror("fork error");
     }
     return pid;
+}
+typedef void Sigfunc(int);
+Sigfunc *mysignal(int signo, Sigfunc* sigfunc)
+{
+    struct sigaction act, oact;
+    act.sa_handler = sigfunc;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+    if(signo==SIGALRM) {
+#ifdef SA_INTERRUPT
+        act.sa_flags |= SA_INTERRUPT;
+#endif
+    } else {
+#ifdef SA_RESTART
+        act.sa_flags |= SA_RESTART;
+#endif
+    }
+    if(sigaction(signo, &act, &oact)<0)
+        return SIG_ERR;
+    return oact.sa_handler;
+}
+Sigfunc *Mysignal(int signo, Sigfunc *sigfunc)
+{
+    Sigfunc *f = mysignal(signo, sigfunc);
+    if(f==SIG_ERR)
+        Perror("sigaction error");
+    return f;
+}
+int Close(int fd) {
+    int r = close(fd);
+    if(r==-1)
+        Perror("close error");
+    return r;
+}
+int Select(int nfds, fd_set* read_set, fd_set* write_set, fd_set* except_set, struct timeval *val)
+{
+    int r;
+    while((r=select(nfds,read_set,write_set,except_set,val))==-1) {
+        if(errno==EINTR)
+            continue;
+        Perror("select() error");
+    }
+    return r;
+}
+int Poll(struct pollfd* fds, nfds_t size, int timeout)
+{
+    int nready;
+    while((nready=poll(fds,size,timeout))<0) {
+        if(errno == EINTR) 
+            continue;
+        break;
+    }
+    return nready;
+}
+long myMax(long x, long y)
+{
+    return x>=y?x:y;
 }
 #endif
