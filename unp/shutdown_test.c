@@ -12,7 +12,8 @@ int main(int argc, char *argv[])
     Connect(clifd, (struct sockaddr*)&servaddr, sizeof(servaddr));
     sleep(1);
     shutdown(clifd,SHUT_RD);
-    shutdown(clifd,SHUT_WR);
-    sleep(2);
+    fprintf(stderr,"after SHUT_RD\n");
+    sleep(5);
+    fprintf(stderr,"exting...\n");
     return 0;
 }
