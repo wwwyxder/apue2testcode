@@ -14,6 +14,6 @@ int main(int argc, char *argv[])
     shutdown(clifd,SHUT_RD);
     fprintf(stderr,"after SHUT_RD\n");
     sleep(5);
-    fprintf(stderr,"exting...\n");
+    fprintf(stderr,"exiting...\n");
     return 0;
 }

@@ -265,6 +265,26 @@ int Poll(struct pollfd* fds, nfds_t size, int timeout)
     }
     return nready;
 }
+ssize_t Recvfrom(int fd, void* buf, size_t buflen, int flags, struct sockaddr* addr, socklen_t *addrlen)
+{
+    int n;
+    while((n=recvfrom(fd,buf,buflen,flags,addr,addrlen))==-1) {
+        if(errno == EINTR) continue;
+        Perror("recvfrom error");
+        break;
+    }
+    return n;
+}
+ssize_t Sendto(int fd, const void *buf, size_t buflen, int flags, const struct sockaddr *dstaddr, socklen_t addrlen)
+{
+    int n;
+    while((n=sendto(fd,buf,buflen,flags,dstaddr,addrlen))==-1) {
+        if(errno==EINTR) continue;
+        Perror("sendto error");
+        break;
+    }
+    return n;
+}
 long myMax(long x, long y)
 {
     return x>=y?x:y;
