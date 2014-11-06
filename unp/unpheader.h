@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <poll.h>
+#include <netinet/in.h> //for freeBSD
 void Perror(const char *s)
 {
     perror(s);
