@@ -1,12 +1,17 @@
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <poll.h>
 #include "unpheader.h"
 #define MAXFD 1024
-int main()
+int main(int argc, char* argv[])
 {
     struct sockaddr_in addr;
     memset(&addr,0,sizeof(addr));
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    if(argc==1) {
+        addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    } else {
+        inet_pton(AF_INET, argv[1], &addr.sin_addr);
+    }
     addr.sin_port = htons(12200);
     int listenfd = Socket(AF_INET, SOCK_STREAM, 0);
     Bind(listenfd, (struct sockaddr *)&addr, sizeof(addr));
