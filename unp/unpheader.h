@@ -16,6 +16,12 @@ void Perror(const char *s)
     perror(s);
     exit(1);
 }
+int Setsockopt(int sockfd, int level, int optname, const void* optval, socklen_t optlen) {
+    int r = setsockopt(sockfd,level,optname,optval,optlen);
+    if(r==-1) {
+        Perror("setsockopt error");
+    }
+}
 char* Fgets(char* ptr, int n, FILE *stream)
 {
     char *rptr = fgets(ptr,n,stream);
