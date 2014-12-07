@@ -5,13 +5,22 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
 #include <unistd.h>
 #include <signal.h>
 #include <poll.h>
+#include <netinet/in.h> //for freeBSD
 void Perror(const char *s)
 {
     perror(s);
     exit(1);
+}
+int Setsockopt(int sockfd, int level, int optname, const void* optval, socklen_t optlen) {
+    int r = setsockopt(sockfd,level,optname,optval,optlen);
+    if(r==-1) {
+        Perror("setsockopt error");
+    }
 }
 char* Fgets(char* ptr, int n, FILE *stream)
 {
@@ -263,6 +272,26 @@ int Poll(struct pollfd* fds, nfds_t size, int timeout)
         break;
     }
     return nready;
+}
+ssize_t Recvfrom(int fd, void* buf, size_t buflen, int flags, struct sockaddr* addr, socklen_t *addrlen)
+{
+    int n;
+    while((n=recvfrom(fd,buf,buflen,flags,addr,addrlen))==-1) {
+        if(errno == EINTR) continue;
+        Perror("recvfrom error");
+        break;
+    }
+    return n;
+}
+ssize_t Sendto(int fd, const void *buf, size_t buflen, int flags, const struct sockaddr *dstaddr, socklen_t addrlen)
+{
+    int n;
+    while((n=sendto(fd,buf,buflen,flags,dstaddr,addrlen))==-1) {
+        if(errno==EINTR) continue;
+        Perror("sendto error");
+        break;
+    }
+    return n;
 }
 long myMax(long x, long y)
 {
